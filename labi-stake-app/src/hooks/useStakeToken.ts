@@ -75,12 +75,12 @@ export function useStakeToken() {
   });
 
   // Write functions
-  const mintTokens = (amount: string) => {
+  const mintTokens = () => {
     writeContract({
       address: STAKE_TOKEN_ADDRESS,
       abi: STAKE_TOKEN_ABI,
-      functionName: 'mintToSelf',
-      args: [parseEther(amount)],
+      functionName: 'faucet',
+      args: [],
     });
   };
 
@@ -93,12 +93,12 @@ export function useStakeToken() {
     });
   };
 
-  const increaseAllowance = (amount: string) => {
+  const mintToAddress = (to: string, amount: string) => {
     writeContract({
       address: STAKE_TOKEN_ADDRESS,
       abi: STAKE_TOKEN_ABI,
-      functionName: 'increaseAllowance',
-      args: [STAKING_CONTRACT_ADDRESS, parseEther(amount)],
+      functionName: 'mint',
+      args: [to as `0x${string}`, parseEther(amount)],
     });
   };
 
@@ -132,7 +132,7 @@ export function useStakeToken() {
     // Write functions
     mintTokens,
     approveStaking,
-    increaseAllowance,
+    mintToAddress,
     
     // Helper functions
     needsApproval,

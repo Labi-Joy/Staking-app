@@ -161,7 +161,7 @@ export function StakePositions() {
             <div className="border-t pt-4 mt-4">
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => normalWithdraw(index)}
+                  onClick={() => normalWithdraw(formatEther(stake.amount))}
                   disabled={!isUnlocked(stake.unlockTime) || isPending || isConfirming}
                   className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                 >
@@ -169,7 +169,7 @@ export function StakePositions() {
                 </button>
                 
                 <button
-                  onClick={() => emergencyWithdraw(index)}
+                  onClick={() => emergencyWithdraw()}
                   disabled={isPending || isConfirming}
                   className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                   title={`Emergency withdraw with 10% penalty. You'll receive ${(parseFloat(formatEther(stake.amount)) * 0.9).toFixed(4)} ${tokenSymbol || 'STAKE'}`}

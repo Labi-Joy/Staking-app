@@ -1,7 +1,4 @@
-export const STAKE_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_STAKE_TOKEN_ADDRESS || '0x0000000000000000000000000000000000000000') as `0x${string}`;
-
-// MockToken ABI
-export const STAKE_TOKEN_ABI = [
+[
   {
     "type": "constructor",
     "inputs": [],
@@ -340,4 +337,4 @@ export const STAKE_TOKEN_ABI = [
       }
     ]
   }
-] as const;
+]

@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { useStakeToken } from '@/hooks/useStakeToken';
 import { useAccount } from 'wagmi';
 
 export function TokenMinting() {
-  const [mintAmount, setMintAmount] = useState('');
   const { 
     mintTokens, 
     tokenBalance, 
@@ -18,13 +16,6 @@ export function TokenMinting() {
   } = useStakeToken();
   const { isConnected } = useAccount();
 
-  const handleMint = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mintAmount && parseFloat(mintAmount) > 0) {
-      mintTokens(mintAmount);
-      setMintAmount('');
-    }
-  };
 
   if (!isConnected) {
     return (
@@ -55,33 +46,16 @@ export function TokenMinting() {
         </div>
       </div>
 
-      {/* Minting Form */}
-      <form onSubmit={handleMint} className="space-y-4">
-        <div>
-          <label htmlFor="mintAmount" className="block text-sm font-medium text-gray-700 mb-2">
-            Amount to Mint ({tokenSymbol || 'STAKE'})
-          </label>
-          <input
-            type="number"
-            id="mintAmount"
-            value={mintAmount}
-            onChange={(e) => setMintAmount(e.target.value)}
-            placeholder="Enter amount to mint"
-            min="0"
-            step="1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            disabled={isPending || isConfirming}
-          />
-        </div>
-        
+      {/* Faucet Button */}
+      <div className="space-y-4">
         <button
-          type="submit"
-          disabled={!mintAmount || parseFloat(mintAmount) <= 0 || isPending || isConfirming}
-          className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          onClick={() => mintTokens()}
+          disabled={isPending || isConfirming}
+          className="w-full bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-lg"
         >
-          {isPending ? '⏳ Preparing...' : isConfirming ? '⏳ Confirming...' : '🪙 Mint Tokens'}
+          {isPending ? '⏳ Preparing...' : isConfirming ? '⏳ Confirming...' : '🪙 Get Free Tokens from Faucet'}
         </button>
-      </form>
+      </div>
 
       {isConfirmed && (
         <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
@@ -100,21 +74,11 @@ export function TokenMinting() {
         </div>
       </div>
 
-      {/* Quick Mint Buttons */}
-      <div className="mt-4 space-y-2">
-        <p className="text-sm font-medium text-gray-700">Quick Mint:</p>
-        <div className="flex gap-2">
-          {[10, 50, 100, 500].map((amount) => (
-            <button
-              key={amount}
-              onClick={() => setMintAmount(amount.toString())}
-              disabled={isPending || isConfirming}
-              className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 transition-colors"
-            >
-              {amount} {tokenSymbol || 'STAKE'}
-            </button>
-          ))}
-        </div>
+      {/* Faucet Info */}
+      <div className="mt-4 text-center">
+        <p className="text-sm text-purple-600">
+          💧 Faucet gives you a fixed amount of tokens for testing
+        </p>
       </div>
     </div>
   );

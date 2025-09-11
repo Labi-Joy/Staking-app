@@ -17,20 +17,20 @@ export function useStakingContract() {
   }, []);
 
   // Read functions
-  const { data: userStakes, refetch: refetchUserStakes } = useReadContract({
+  const { data: userDetails, refetch: refetchUserDetails } = useReadContract({
     address: STAKING_CONTRACT_ADDRESS,
     abi: STAKING_CONTRACT_ABI,
-    functionName: 'getUserStakes',
+    functionName: 'getUserDetails',
     args: address ? [address] : undefined,
     query: {
       enabled: !!address && mounted,
     },
   });
 
-  const { data: userStakeCount } = useReadContract({
+  const { data: userInfo, refetch: refetchUserInfo } = useReadContract({
     address: STAKING_CONTRACT_ADDRESS,
     abi: STAKING_CONTRACT_ABI,
-    functionName: 'getUserStakeCount',
+    functionName: 'userInfo',
     args: address ? [address] : undefined,
     query: {
       enabled: !!address && mounted,
@@ -47,10 +47,10 @@ export function useStakingContract() {
     },
   });
 
-  const { data: userTotalStaked, refetch: refetchUserTotalStaked } = useReadContract({
+  const { data: timeUntilUnlock } = useReadContract({
     address: STAKING_CONTRACT_ADDRESS,
     abi: STAKING_CONTRACT_ABI,
-    functionName: 'getUserTotalStaked',
+    functionName: 'getTimeUntilUnlock',
     args: address ? [address] : undefined,
     query: {
       enabled: !!address && mounted,
@@ -60,25 +60,31 @@ export function useStakingContract() {
   const { data: totalStaked } = useReadContract({
     address: STAKING_CONTRACT_ADDRESS,
     abi: STAKING_CONTRACT_ABI,
-    functionName: 'getTotalStaked',
+    functionName: 'totalStaked',
   });
 
-  const { data: rewardRate } = useReadContract({
+  const { data: currentRewardRate } = useReadContract({
     address: STAKING_CONTRACT_ADDRESS,
     abi: STAKING_CONTRACT_ABI,
-    functionName: 'getRewardRate',
+    functionName: 'currentRewardRate',
   });
 
-  const { data: apr } = useReadContract({
+  const { data: initialApr } = useReadContract({
     address: STAKING_CONTRACT_ADDRESS,
     abi: STAKING_CONTRACT_ABI,
-    functionName: 'getAPR',
+    functionName: 'initialApr',
   });
 
-  const { data: lockPeriod } = useReadContract({
+  const { data: minLockDuration } = useReadContract({
     address: STAKING_CONTRACT_ADDRESS,
     abi: STAKING_CONTRACT_ABI,
-    functionName: 'getLockPeriod',
+    functionName: 'minLockDuration',
+  });
+
+  const { data: emergencyWithdrawPenalty } = useReadContract({
+    address: STAKING_CONTRACT_ADDRESS,
+    abi: STAKING_CONTRACT_ABI,
+    functionName: 'emergencyWithdrawPenalty',
   });
 
   // Write functions
@@ -91,21 +97,21 @@ export function useStakingContract() {
     });
   };
 
-  const withdraw = (stakeId: number) => {
+  const withdraw = (amount: string) => {
     writeContract({
       address: STAKING_CONTRACT_ADDRESS,
       abi: STAKING_CONTRACT_ABI,
       functionName: 'withdraw',
-      args: [BigInt(stakeId)],
+      args: [parseEther(amount)],
     });
   };
 
-  const normalWithdraw = (stakeId: number) => {
+  const emergencyWithdraw = () => {
     writeContract({
       address: STAKING_CONTRACT_ADDRESS,
       abi: STAKING_CONTRACT_ABI,
-      functionName: 'normalWithdraw',
-      args: [BigInt(stakeId)],
+      functionName: 'emergencyWithdraw',
+      args: [],
     });
   };
 
@@ -117,37 +123,52 @@ export function useStakingContract() {
     });
   };
 
-  const emergencyWithdraw = (stakeId: number) => {
-    writeContract({
-      address: STAKING_CONTRACT_ADDRESS,
-      abi: STAKING_CONTRACT_ABI,
-      functionName: 'emergencyWithdraw',
-      args: [BigInt(stakeId)],
-    });
-  };
-
   // Helper functions
   const refetchAll = () => {
-    refetchUserStakes();
+    refetchUserDetails();
+    refetchUserInfo();
     refetchPendingRewards();
-    refetchUserTotalStaked();
   };
 
-  return {
-    // Read data
-    userStakes,
-    userStakeCount,
-    pendingRewards: pendingRewards ? formatEther(pendingRewards) : '0',
-    userTotalStaked: userTotalStaked ? formatEther(userTotalStaked) : '0',
-    totalStaked: totalStaked ? formatEther(totalStaked) : '0',
-    rewardRate: rewardRate ? Number(rewardRate) / 100 : 0, // Convert basis points to percentage
-    apr: apr ? Number(apr) / 100 : 0, // Convert basis points to percentage
-    lockPeriod: lockPeriod ? Number(lockPeriod) : 0,
+  // Extract values from userDetails - safely access tuple/object properties
+  const stakedAmount = userDetails && typeof userDetails === 'object' && 'stakedAmount' in userDetails 
+    ? (userDetails as { stakedAmount: bigint }).stakedAmount : BigInt(0);
+  const lastStakeTimestamp = userDetails && typeof userDetails === 'object' && 'lastStakeTimestamp' in userDetails 
+    ? (userDetails as { lastStakeTimestamp: bigint }).lastStakeTimestamp : BigInt(0);
+  const canWithdraw = userDetails && typeof userDetails === 'object' && 'canWithdraw' in userDetails 
+    ? (userDetails as { canWithdraw: boolean }).canWithdraw : false;
 
-    // Write functions
+  // Create a compatible format for existing UI components
+  const userStakes = stakedAmount > BigInt(0) ? [{
+    amount: stakedAmount,
+    timestamp: lastStakeTimestamp,
+    unlockTime: lastStakeTimestamp + (minLockDuration || BigInt(0)),
+    rewardDebt: BigInt(0),
+    active: true
+  }] : [];
+
+  return {
+    // Read data - compatible with existing UI
+    userStakes,
+    userStakeCount: stakedAmount > BigInt(0) ? BigInt(1) : BigInt(0),
+    pendingRewards: pendingRewards ? formatEther(pendingRewards) : '0',
+    userTotalStaked: stakedAmount ? formatEther(stakedAmount) : '0',
+    totalStaked: totalStaked ? formatEther(totalStaked) : '0',
+    rewardRate: currentRewardRate ? Number(currentRewardRate) : 0,
+    apr: initialApr ? Number(initialApr) : 0,
+    lockPeriod: minLockDuration ? Number(minLockDuration) : 0,
+    
+    // New data from updated contract
+    userDetails,
+    userInfo,
+    timeUntilUnlock: timeUntilUnlock ? Number(timeUntilUnlock) : 0,
+    canWithdraw,
+    emergencyWithdrawPenalty: emergencyWithdrawPenalty ? Number(emergencyWithdrawPenalty) : 1000, // 10%
+
+    // Write functions - updated for new contract
     stake,
     withdraw,
-    normalWithdraw,
+    normalWithdraw: withdraw, // Alias for compatibility
     claimRewards,
     emergencyWithdraw,
 
