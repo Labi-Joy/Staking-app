@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useStakingContract } from '@/hooks/useStakingContract';
 import { useStakeToken } from '@/hooks/useStakeToken';
 import { useAccount } from 'wagmi';
@@ -14,9 +15,12 @@ interface Stake {
 }
 
 export function StakePositions() {
+
   const { userStakes, normalWithdraw, emergencyWithdraw, isPending, isConfirming } = useStakingContract();
   const { tokenSymbol } = useStakeToken();
   const { isConnected } = useAccount();
+
+
 
   if (!isConnected) {
     return (

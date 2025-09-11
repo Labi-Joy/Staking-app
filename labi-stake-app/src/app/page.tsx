@@ -11,7 +11,7 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Labi Stake App</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Stake and Earn</h1>
           <p className="text-lg text-gray-600">Mint STAKE tokens and earn rewards on Sepolia testnet</p>
         </div>
 
@@ -36,15 +36,12 @@ export default function Home() {
           <div>
             <StakePositions />
           </div>
-          
+
         </div>
 
         {/* Footer */}
         <div className="text-center text-gray-600 text-sm">
           <p>Built with Next.js, RainbowKit, and Wagmi</p>
-          <p className="mt-2">
-            Contract Address: <span className="font-mono">Update after deployment</span>
-          </p>
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ export function StakingStats() {
       <h2 className="text-xl font-semibold mb-4">Staking Statistics</h2>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="text-center p-4 bg-blue-50 rounded-lg">
+        <div className="text-center p-4 bg-blue-50 rounded-lg border-blue-100">
           <p className="text-sm text-gray-600 mb-1">Your Total Staked</p>
           <p className="text-lg font-bold text-blue-600">{parseFloat(userTotalStaked).toFixed(4)} ETH</p>
         </div>
