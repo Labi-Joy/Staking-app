@@ -5,5 +5,5 @@ export const wagmiConfig = getDefaultConfig({
   appName: 'Labi Stake App',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '', // Get this from WalletConnect Cloud
   chains: [sepolia],
-  ssr: false, // Disable SSR to avoid indexedDB issues
+  ssr: false,
 });

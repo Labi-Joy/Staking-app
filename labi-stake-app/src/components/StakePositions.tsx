@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { useStakingContract } from '@/hooks/useStakingContract';
 import { useStakeToken } from '@/hooks/useStakeToken';
 import { useAccount } from 'wagmi';
@@ -15,11 +15,33 @@ interface Stake {
 }
 
 export function StakePositions() {
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
 
-  const { userStakes, normalWithdraw, emergencyWithdraw, isPending, isConfirming } = useStakingContract();
+  const { userStakes, normalWithdraw, emergencyWithdraw, isPending, isConfirming, isConfirmed } = useStakingContract();
   const { tokenSymbol } = useStakeToken();
   const { isConnected } = useAccount();
 
+  // Handle alert auto-dismiss for withdrawal operations
+  useEffect(() => {
+    if (isConfirmed) {
+      setAlertType('success');
+      setAlertMessage('🎉 Withdrawal successful! Tokens have been sent to your wallet.');
+      setShowAlert(true);
+      
+      // Auto-dismiss after 3 seconds
+      const timer = setTimeout(() => {
+        setShowAlert(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmed]);
+
+  const dismissAlert = () => {
+    setShowAlert(false);
+  };
 
 
   if (!isConnected) {
@@ -191,6 +213,23 @@ export function StakePositions() {
           </div>
         ))}
       </div>
+
+      {/* Auto-dismissing Alert */}
+      {showAlert && (
+        <div className={`mt-4 p-3 rounded-md border flex items-center justify-between ${
+          alertType === 'success' 
+            ? 'bg-green-100 border-green-400 text-green-700' 
+            : 'bg-red-100 border-red-400 text-red-700'
+        }`}>
+          <span>{alertMessage}</span>
+          <button
+            onClick={dismissAlert}
+            className="ml-2 text-sm hover:font-bold transition-all"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

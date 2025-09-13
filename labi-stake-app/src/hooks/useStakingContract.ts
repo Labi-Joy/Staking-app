@@ -2,7 +2,7 @@ import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 
 import { useAccount } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
 import { STAKING_CONTRACT_ADDRESS, STAKING_CONTRACT_ABI } from '@/config/contract';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export function useStakingContract() {
   const [mounted, setMounted] = useState(false);
@@ -120,15 +120,26 @@ export function useStakingContract() {
       address: STAKING_CONTRACT_ADDRESS,
       abi: STAKING_CONTRACT_ABI,
       functionName: 'claimRewards',
+      args: [],
     });
   };
 
   // Helper functions
-  const refetchAll = () => {
+  const refetchAll = useCallback(() => {
     refetchUserDetails();
     refetchUserInfo();
     refetchPendingRewards();
-  };
+  }, [refetchUserDetails, refetchUserInfo, refetchPendingRewards]);
+
+  // Refetch data when transactions are confirmed
+  useEffect(() => {
+    if (isConfirmed) {
+      // Refetch all contract data after successful transaction
+      setTimeout(() => {
+        refetchAll();
+      }, 1000); // Small delay to ensure blockchain state is updated
+    }
+  }, [isConfirmed, refetchAll]);
 
   // Extract values from userDetails - safely access tuple/object properties
   const stakedAmount = userDetails && typeof userDetails === 'object' && 'stakedAmount' in userDetails 
@@ -138,7 +149,7 @@ export function useStakingContract() {
   const canWithdraw = userDetails && typeof userDetails === 'object' && 'canWithdraw' in userDetails 
     ? (userDetails as { canWithdraw: boolean }).canWithdraw : false;
 
-  // Create a compatible format for existing UI components
+  
   const userStakes = stakedAmount > BigInt(0) ? [{
     amount: stakedAmount,
     timestamp: lastStakeTimestamp,
@@ -148,7 +159,7 @@ export function useStakingContract() {
   }] : [];
 
   return {
-    // Read data - compatible with existing UI
+    // Read data
     userStakes,
     userStakeCount: stakedAmount > BigInt(0) ? BigInt(1) : BigInt(0),
     pendingRewards: pendingRewards ? formatEther(pendingRewards) : '0',
@@ -158,14 +169,14 @@ export function useStakingContract() {
     apr: initialApr ? Number(initialApr) : 0,
     lockPeriod: minLockDuration ? Number(minLockDuration) : 0,
     
-    // New data from updated contract
+    
     userDetails,
     userInfo,
     timeUntilUnlock: timeUntilUnlock ? Number(timeUntilUnlock) : 0,
     canWithdraw,
     emergencyWithdrawPenalty: emergencyWithdrawPenalty ? Number(emergencyWithdrawPenalty) : 1000, // 10%
 
-    // Write functions - updated for new contract
+    // Write function
     stake,
     withdraw,
     normalWithdraw: withdraw, // Alias for compatibility

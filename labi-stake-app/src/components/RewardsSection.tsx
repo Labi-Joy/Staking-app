@@ -1,11 +1,36 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useStakingContract } from '@/hooks/useStakingContract';
 import { useAccount } from 'wagmi';
 
 export function RewardsSection() {
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
+
   const { pendingRewards, claimRewards, isPending, isConfirming, isConfirmed, userTotalStaked } = useStakingContract();
   const { isConnected } = useAccount();
+
+  // Handle alert auto-dismiss for claim operations
+  useEffect(() => {
+    if (isConfirmed) {
+      setAlertType('success');
+      setAlertMessage('🎉 Rewards claimed successfully! Tokens have been sent to your wallet.');
+      setShowAlert(true);
+      
+      // Auto-dismiss after 3 seconds
+      const timer = setTimeout(() => {
+        setShowAlert(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmed]);
+
+  const dismissAlert = () => {
+    setShowAlert(false);
+  };
 
   if (!isConnected) {
     return (
@@ -48,9 +73,20 @@ export function RewardsSection() {
         {isPending ? '⏳ Preparing...' : isConfirming ? '⏳ Confirming...' : hasPendingRewards ? '💰 Claim Rewards' : '💰 No Rewards Yet'}
       </button>
 
-      {isConfirmed && (
-        <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-          🎉 Rewards claimed successfully!
+      {/* Auto-dismissing Alert */}
+      {showAlert && (
+        <div className={`mt-4 p-3 rounded-md border flex items-center justify-between ${
+          alertType === 'success' 
+            ? 'bg-green-100 border-green-400 text-green-700' 
+            : 'bg-red-100 border-red-400 text-red-700'
+        }`}>
+          <span>{alertMessage}</span>
+          <button
+            onClick={dismissAlert}
+            className="ml-2 text-sm hover:font-bold transition-all"
+          >
+            ✕
+          </button>
         </div>
       )}
 
