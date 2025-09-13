@@ -1,0 +1,112 @@
+type User @entity {
+  id: ID! # user address
+  address: Bytes!
+  totalStaked: BigInt!
+  totalRewardsClaimed: BigInt!
+  stakingPositions: [Stake!]! @derivedFrom(field: "user")
+  transactions: [Transaction!]! @derivedFrom(field: "user")
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type Stake @entity {
+  id: ID! # tx hash + log index
+  user: User!
+  amount: BigInt!
+  timestamp: BigInt!
+  lockEndTime: BigInt!
+  rewardsClaimed: BigInt!
+  isActive: Boolean!
+  currentRewardRate: BigInt!
+  totalStakedAtTime: BigInt!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type Transaction @entity {
+  id: ID! # tx hash + log index
+  user: User!
+  type: TransactionType!
+  amount: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  gasPrice: BigInt
+  gasUsed: BigInt
+  # For staking transactions
+  newTotalStaked: BigInt
+  currentRewardRate: BigInt
+  # For withdrawal transactions  
+  rewardsAccrued: BigInt
+  # For emergency withdrawals
+  penalty: BigInt
+}
+
+enum TransactionType {
+  STAKE
+  WITHDRAW
+  REWARD_CLAIM
+  EMERGENCY_WITHDRAW
+  TOKEN_TRANSFER
+}
+
+type StakingStats @entity {
+  id: ID! # "global"
+  totalStaked: BigInt!
+  totalUsers: BigInt!
+  totalRewardsClaimed: BigInt!
+  currentRewardRate: BigInt!
+  totalTransactions: BigInt!
+  updatedAt: BigInt!
+}
+
+type Token @entity {
+  id: ID! # token address
+  address: Bytes!
+  name: String!
+  symbol: String!
+  decimals: BigInt!
+  totalSupply: BigInt!
+}
+
+type Transfer @entity {
+  id: ID! # tx hash + log index
+  token: Token!
+  from: User!
+  to: User!
+  amount: BigInt!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type RewardRateUpdate @entity {
+  id: ID! # tx hash + log index
+  oldRate: BigInt!
+  newRate: BigInt!
+  timestamp: BigInt!
+  totalStaked: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+# Daily aggregation entities for analytics
+type DailyStakingStats @entity {
+  id: ID! # YYYY-MM-DD
+  date: String!
+  totalStaked: BigInt!
+  totalUsers: BigInt!
+  newStakes: BigInt!
+  newUsers: BigInt!
+  totalRewardsClaimed: BigInt!
+  averageStakeAmount: BigInt!
+}
+
+type HourlyStakingStats @entity {
+  id: ID! # YYYY-MM-DD-HH
+  hour: String!
+  totalStaked: BigInt!
+  newStakes: BigInt!
+  newUsers: BigInt!
+  totalRewardsClaimed: BigInt!
+}

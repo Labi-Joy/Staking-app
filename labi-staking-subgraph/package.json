@@ -1,0 +1,16 @@
+{
+  "name": "labi-staking-subgraph",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy",
+    "create-local": "graph create --node http://localhost:8020/ labi-staking-subgraph",
+    "remove-local": "graph remove --node http://localhost:8020/ labi-staking-subgraph",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 labi-staking-subgraph"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.90.0",
+    "@graphprotocol/graph-ts": "^0.32.0"
+  }
+}

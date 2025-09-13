@@ -1,38 +1,11 @@
-type EmergencyWithdrawn @entity(immutable: true) {
-  id: Bytes!
-  user: Bytes! # address
-  amount: BigInt! # uint256
-  penalty: BigInt! # uint256
-  timestamp: BigInt! # uint256
-  newTotalStaked: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type OwnershipTransferred @entity(immutable: true) {
-  id: Bytes!
-  previousOwner: Bytes! # address
-  newOwner: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Paused @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type RewardRateUpdated @entity(immutable: true) {
-  id: Bytes!
-  oldRate: BigInt! # uint256
-  newRate: BigInt! # uint256
-  timestamp: BigInt! # uint256
-  totalStaked: BigInt! # uint256
+type User @entity (immutable: false){
+  id: Bytes! # user address
+  totalStaked: BigInt! # current total staked amount
+  totalRewardsClaimed: BigInt! # lifetime rewards claimed
+  stakeCount: BigInt! # number of times user has staked
+  firstStakeTimestamp: BigInt! # when user first staked
+  lastActivityTimestamp: BigInt! # last stake/unstake/claim
+  isActive: Boolean! # currently has staked tokens
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -62,50 +35,6 @@ type Staked @entity(immutable: true) {
   transactionHash: Bytes!
 }
 
-type StakingInitialized @entity(immutable: true) {
-  id: Bytes!
-  stakingToken: Bytes! # address
-  initialRewardRate: BigInt! # uint256
-  timestamp: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type StakingPaused @entity(immutable: true) {
-  id: Bytes!
-  timestamp: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type StakingUnpaused @entity(immutable: true) {
-  id: Bytes!
-  timestamp: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type TokenRecovered @entity(immutable: true) {
-  id: Bytes!
-  token: Bytes! # address
-  amount: BigInt! # uint256
-  timestamp: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
-type Unpaused @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: Bytes!
-}
-
 type Withdrawn @entity(immutable: true) {
   id: Bytes!
   user: Bytes! # address
@@ -116,5 +45,36 @@ type Withdrawn @entity(immutable: true) {
   rewardsAccrued: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Deposited @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  amount: BigInt! # uint256
+  newUserBalance: BigInt! # user's total staked after deposit
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type StakeWithdrawn @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  amount: BigInt! # uint256
+  remainingBalance: BigInt! # user's remaining staked amount
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type EarlyWithdrawal @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  amount: BigInt! # uint256
+  penaltyAmount: BigInt! # uint256
+  actualReceived: BigInt! # amount after penalty
+  timestamp: BigInt!
+  blockNumber: BigInt!
   transactionHash: Bytes!
 }
